@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AIRA">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#05050a">
+<title>AIRA</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;outline:none;-webkit-tap-highlight-color:transparent;}
+
+:root{
+  --bg:#05050a;
+  --aira:#c8dce8;
+  --aira-dim:rgba(200,220,232,0.38);
+  --muted:rgba(200,220,232,0.5);
+  --line:rgba(200,220,232,0.07);
+  --red:rgba(220,90,90,0.9);
+  --red-dim:rgba(220,90,90,0.25);
+  --green:rgba(90,210,150,0.9);
+  --green-dim:rgba(90,210,150,0.25);
+  --amber:rgba(220,170,80,0.9);
+  --amber-dim:rgba(220,170,80,0.25);
+  --purple:rgba(160,120,220,0.9);
+  --purple-dim:rgba(160,120,220,0.25);
+  --cyan:rgba(80,200,220,0.9);
+  --cyan-dim:rgba(80,200,220,0.25);
+}
+
+html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-family:'Rajdhani',sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9000;opacity:0.7;}
+
+/* ── PAGES ── */
+.page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.65s ease;}
+.page.active{opacity:1;pointer-events:all;}
+
+/* ── SHARED ── */
+.corners{position:absolute;inset:0;pointer-events:none;}
+.c{position:absolute;width:22px;height:22px;}
+.c.tl{top:28px;left:28px;border-top:1.5px solid var(--aira);border-left:1.5px solid var(--aira);opacity:0.35;}
+.c.tr{top:28px;right:28px;border-top:1.5px solid var(--aira);border-right:1.5px solid var(--aira);opacity:0.35;}
+.c.bl{bottom:28px;left:28px;border-bottom:1.5px solid var(--aira);border-left:1.5px solid var(--aira);opacity:0.35;}
+.c.br{bottom:28px;right:28px;border-bottom:1.5px solid var(--aira);border-right:1.5px solid var(--aira);opacity:0.35;}
+
+.topbar{position:absolute;top:44px;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:0 32px;}
+.tb{font-size:13px;font-weight:600;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--aira);box-shadow:0 0 10px var(--aira);animation:blink 3s ease-in-out infinite;}
+.dot.red{background:var(--red);box-shadow:0 0 10px var(--red);animation:blinkF 1s ease-in-out infinite;}
+.dot.green{background:var(--green);box-shadow:0 0 10px var(--green);}
+.dot.amber{background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blinkF 1.5s ease-in-out infinite;}
+.dot.purple{background:var(--purple);box-shadow:0 0 10px var(--purple);}
+.dot.cyan{background:var(--cyan);box-shadow:0 0 10px var(--cyan);}
+.dot.off{background:rgba(200,220,232,0.15);box-shadow:none;animation:none;}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+@keyframes blinkF{0%,100%{opacity:1}50%{opacity:0.15}}
+
+.rings{position:absolute;inset:0;pointer-events:none;}
+.ring{position:absolute;border-radius:50%;border:1px solid var(--line);top:50%;left:50%;}
+.ring1{width:260px;height:260px;transform:translate(-50%,-58%);animation:rB 7s ease-in-out infinite;}
+.ring2{width:370px;height:370px;transform:translate(-50%,-58%);animation:rB 7s ease-in-out infinite 1.8s;opacity:0.5;}
+.ring3{width:480px;height:480px;transform:translate(-50%,-58%);animation:rB 7s ease-in-out infinite 3.2s;opacity:0.25;}
+.ring.pr{border-color:rgba(220,90,90,0.12)!important;animation:rPr 1.2s ease-in-out infinite!important;}
+.ring.pg{border-color:rgba(90,210,150,0.12)!important;animation:rPg 2s ease-in-out infinite!important;}
+.ring.pa{border-color:rgba(220,170,80,0.12)!important;animation:rPa 1.8s ease-in-out infinite!important;}
+.ring.pp{border-color:rgba(160,120,220,0.12)!important;animation:rPp 3s ease-in-out infinite!important;}
+.ring.pc{border-color:rgba(80,200,220,0.12)!important;animation:rPc 2.5s ease-in-out infinite!important;}
+.ring.pw{border-color:rgba(200,220,232,0.1)!important;animation:rPw 2.2s ease-in-out infinite!important;}
+
+@keyframes rB{0%,100%{transform:translate(-50%,-58%) scale(1)}50%{transform:translate(-50%,-58%) scale(1.04)}}
+@keyframes rPr{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:.4}50%{transform:translate(-50%,-58%) scale(1.12);opacity:1}}
+@keyframes rPg{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:.4}50%{transform:translate(-50%,-58%) scale(1.08);opacity:1}}
+@keyframes rPa{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:.4}50%{transform:translate(-50%,-58%) scale(1.1);opacity:1}}
+@keyframes rPp{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:.3}50%{transform:translate(-50%,-58%) scale(1.06);opacity:.9}}
+@keyframes rPc{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:.3}50%{transform:translate(-50%,-58%) scale(1.07);opacity:.9}}
+@keyframes rPw{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:.4}50%{transform:translate(-50%,-58%) scale(1.1);opacity:1}}
+
+.name-block{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.name{font-family:'Bebas Neue',sans-serif;font-size:96px;letter-spacing:20px;line-height:1;transition:color 0.8s ease,text-shadow 0.8s ease;}
+.name.c-blue{color:var(--aira);text-shadow:0 0 60px rgba(200,220,232,0.2);}
+.name.c-blue.glow{text-shadow:0 0 40px rgba(200,220,232,0.6),0 0 100px rgba(200,220,232,0.25);}
+.name.c-red{color:rgba(220,90,90,0.9);text-shadow:0 0 40px rgba(220,90,90,0.35),0 0 100px rgba(220,90,90,0.12);}
+.name.c-green{color:rgba(90,210,150,0.9);text-shadow:0 0 40px rgba(90,210,150,0.35),0 0 100px rgba(90,210,150,0.12);}
+.name.c-amber{color:rgba(220,170,80,0.9);text-shadow:0 0 40px rgba(220,170,80,0.35),0 0 100px rgba(220,170,80,0.12);}
+.name.c-purple{color:rgba(160,120,220,0.9);text-shadow:0 0 40px rgba(160,120,220,0.35),0 0 100px rgba(160,120,220,0.12);}
+.name.c-cyan{color:rgba(80,200,220,0.9);text-shadow:0 0 40px rgba(80,200,220,0.35),0 0 100px rgba(80,200,220,0.12);}
+.name.c-dim{color:rgba(200,220,232,0.3);text-shadow:none;}
+
+.divider{width:36px;height:1.5px;background:linear-gradient(90deg,transparent,var(--aira-dim),transparent);}
+.tagline{font-size:13px;font-weight:500;letter-spacing:6px;color:var(--muted);text-transform:uppercase;transition:color 0.8s ease;}
+
+canvas{display:block;width:100%;height:110px;}
+.state-lbl{margin-top:22px;font-size:13px;font-weight:600;letter-spacing:5px;text-transform:uppercase;color:var(--muted);transition:all 0.8s ease;}
+
+/* ── ORB ── */
+.orb-wrap{position:absolute;bottom:52px;left:0;right:0;display:flex;justify-content:center;}
+.orb{width:60px;height:60px;border-radius:50%;border:1.5px solid rgba(200,220,232,0.2);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:border-color 0.4s ease;-webkit-appearance:none;appearance:none;}
+.orb::before{content:'';position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(200,220,232,0.1);transition:all 0.5s ease;}
+.orb.active{border-color:rgba(200,220,232,0.6);}
+.orb.active::before{background:rgba(200,220,232,0.07);border-color:rgba(200,220,232,0.3);box-shadow:0 0 24px rgba(200,220,232,0.18);}
+.orb-dot{width:8px;height:8px;border-radius:50%;background:var(--aira);opacity:0.4;transition:all 0.4s ease;}
+.orb.active .orb-dot{opacity:1;box-shadow:0 0 14px var(--aira);transform:scale(1.5);}
+
+/* big display text used across pages */
+.big{font-family:'Bebas Neue',sans-serif;letter-spacing:8px;transition:color 0.8s ease,text-shadow 0.8s ease;}
+.sub-label{font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;transition:color 0.8s ease;}
+.icon-lg{font-size:56px;animation:popIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards;}
+
+@keyframes popIn{from{transform:scale(0.4);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* rec dot blink */
+.rec-dot-blink{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);animation:blinkF 1s ease-in-out infinite;display:inline-block;margin-right:8px;}
+
+/* typing cursor */
+.cursor{display:inline-block;width:2px;height:1em;background:var(--aira);margin-left:2px;animation:cursorBlink 1s step-end infinite;vertical-align:middle;}
+@keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* progress bar */
+.prog-bar{width:60%;height:2px;background:rgba(200,220,232,0.1);border-radius:1px;margin-top:16px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--aira);border-radius:1px;transition:width 0.1s linear;}
+
+/* music controls */
+.music-controls{display:flex;align-items:center;gap:28px;margin-top:24px;}
+.mc-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(200,220,232,0.18);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted);transition:all 0.3s ease;-webkit-appearance:none;appearance:none;}
+.mc-btn.main{width:56px;height:56px;border-color:rgba(200,220,232,0.35);color:var(--aira);font-size:20px;}
+.mc-btn:active{background:rgba(200,220,232,0.07);border-color:rgba(200,220,232,0.4);}
+
+/* weather grid */
+.wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:80%;margin-top:8px;}
+.wx-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px;border:1px solid rgba(200,220,232,0.08);border-radius:10px;}
+.wx-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--aira);}
+.wx-key{font-size:9px;font-weight:600;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+
+/* note content */
+.note-content{width:80%;text-align:center;font-size:18px;font-weight:500;letter-spacing:2px;color:rgba(200,220,232,0.7);line-height:1.6;margin-top:8px;word-break:break-word;}
+
+/* alert bar */
+.alert-bar{width:80%;padding:14px 20px;border-radius:10px;display:flex;align-items:center;gap:12px;margin-top:12px;}
+.alert-bar.red{border:1px solid rgba(220,90,90,0.3);background:rgba(220,90,90,0.05);}
+.alert-bar.amber{border:1px solid rgba(220,170,80,0.3);background:rgba(220,170,80,0.05);}
+.alert-txt{font-size:14px;font-weight:600;letter-spacing:2px;color:rgba(200,220,232,0.75);}
+
+/* dash grid */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:85%;margin-top:12px;}
+.dash-item{padding:14px;border:1px solid rgba(200,220,232,0.08);border-radius:10px;display:flex;flex-direction:column;gap:6px;}
+.dash-val{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:var(--aira);}
+.dash-key{font-size:9px;font-weight:600;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+
+/* sleep overlay */
+#pageSleep{background:#000;}
+#pageSleep .sleep-time{font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:8px;color:rgba(200,220,232,0.12);}
+#pageSleep .sleep-sub{font-size:10px;letter-spacing:4px;color:rgba(200,220,232,0.06);text-transform:uppercase;margin-top:8px;}
+
+/* ════════════════════════════
+   CONTROL PANEL
+════════════════════════════ */
+.p-overlay{position:fixed;inset:0;z-index:8000;display:none;}
+.p-overlay.show{display:block;}
+.panel{position:fixed;bottom:0;left:0;right:0;background:rgba(6,6,11,0.98);border-top:1px solid rgba(200,220,232,0.08);border-radius:20px 20px 0 0;z-index:8001;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);max-height:88vh;overflow-y:auto;}
+.panel.open{transform:translateY(0);}
+.p-handle{width:36px;height:3px;border-radius:2px;background:rgba(200,220,232,0.15);margin:14px auto 0;}
+.p-head{font-size:10px;font-weight:700;letter-spacing:5px;color:rgba(200,220,232,0.2);text-transform:uppercase;text-align:center;padding:12px 0 8px;}
+.p-section{padding:0 18px 12px;}
+.p-sec-title{font-size:9px;font-weight:700;letter-spacing:4px;color:rgba(200,220,232,0.18);text-transform:uppercase;margin-bottom:8px;padding-left:2px;}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.p-grid.col3{grid-template-columns:1fr 1fr 1fr;}
+.p-btn{padding:12px 8px;border-radius:10px;border:1px solid rgba(200,220,232,0.1);background:rgba(200,220,232,0.03);color:rgba(200,220,232,0.65);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-align:center;transition:all 0.2s ease;-webkit-appearance:none;appearance:none;}
+.p-btn:active{background:rgba(200,220,232,0.09);border-color:rgba(200,220,232,0.28);}
+.p-btn.red{border-color:rgba(220,90,90,0.22);color:rgba(220,90,90,0.75);}
+.p-btn.red:active{background:rgba(220,90,90,0.07);}
+.p-btn.green{border-color:rgba(90,210,150,0.22);color:rgba(90,210,150,0.75);}
+.p-btn.green:active{background:rgba(90,210,150,0.07);}
+.p-btn.amber{border-color:rgba(220,170,80,0.22);color:rgba(220,170,80,0.75);}
+.p-btn.amber:active{background:rgba(220,170,80,0.07);}
+.p-btn.purple{border-color:rgba(160,120,220,0.22);color:rgba(160,120,220,0.75);}
+.p-btn.purple:active{background:rgba(160,120,220,0.07);}
+.p-btn.cyan{border-color:rgba(80,200,220,0.22);color:rgba(80,200,220,0.75);}
+.p-btn.cyan:active{background:rgba(80,200,220,0.07);}
+.p-btn.full{grid-column:span 2;}
+.p-btn.full3{grid-column:span 3;}
+.p-divider{height:1px;background:rgba(200,220,232,0.05);margin:4px 18px 12px;}
+
+/* edit fields inside panel */
+.p-field{background:rgba(200,220,232,0.04);border:1px solid rgba(200,220,232,0.1);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.p-field label{display:block;font-size:9px;font-weight:700;letter-spacing:3px;color:rgba(200,220,232,0.3);text-transform:uppercase;margin-bottom:5px;}
+.p-field input,.p-field textarea{width:100%;background:transparent;border:none;color:rgba(200,220,232,0.8);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;resize:none;}
+.p-field input::placeholder,.p-field textarea::placeholder{color:rgba(200,220,232,0.2);}
+
+@keyframes fadeIn{to{opacity:1}}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* typing animation */
+.typing-text{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:600;letter-spacing:2px;color:rgba(200,220,232,0.7);word-break:break-word;text-align:center;width:80%;line-height:1.6;min-height:60px;}
+</style>
+</head>
+<body>
+
+<!-- ══ HOME ══ -->
+<div class="page active" id="pgHome">
+  <div class="rings"><div class="ring ring1" id="hr1"></div><div class="ring ring2" id="hr2"></div><div class="ring ring3" id="hr3"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="clk">--:--</span><div class="dot" id="homeDot"></div><span class="tb" id="dt">—</span></div>
+  <div class="name-block" style="margin-bottom:48px">
+    <div class="name c-blue" id="homeName">AIRA</div>
+    <div class="divider"></div>
+    <div class="tagline" id="homeTag">with you</div>
+  </div>
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <canvas id="wvHome"></canvas>
+    <div class="state-lbl" id="homeState">standby</div>
+  </div>
+  <div class="orb-wrap"><button class="orb" id="orbBtn"><div class="orb-dot"></div></button></div>
+</div>
+
+<!-- ══ RECORDING ══ -->
+<div class="page" id="pgRec">
+  <div class="rings"><div class="ring ring1 pr"></div><div class="ring ring2 pr" style="animation-delay:.5s"></div><div class="ring ring3 pr" style="animation-delay:1s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="rClk">--:--</span><div class="dot red"></div><span class="tb" id="rDt">—</span></div>
+  <div class="name-block" style="margin-bottom:14px">
+    <div class="name c-red">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(220,90,90,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(220,90,90,0.5)">recording</div>
+  </div>
+  <div style="display:flex;align-items:center;margin-bottom:10px"><div class="rec-dot-blink"></div><span class="sub-label" style="color:rgba(220,90,90,0.55);letter-spacing:4px" id="recTypeLabel">voicemail</span></div>
+  <div class="big" style="font-size:52px;color:rgba(220,90,90,0.85);text-shadow:0 0 30px rgba(220,90,90,0.35)" id="recTimer">00:00</div>
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;margin-top:8px">
+    <canvas id="wvRec"></canvas>
+    <div class="state-lbl" style="color:rgba(220,90,90,0.7);letter-spacing:6px">recording</div>
+  </div>
+</div>
+
+<!-- ══ PROCESSING ══ -->
+<div class="page" id="pgProc">
+  <div class="rings"><div class="ring ring1"></div><div class="ring ring2" style="opacity:.25"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="pClk">--:--</span><div class="dot off"></div><span class="tb" id="pDt">—</span></div>
+  <div class="name-block" style="margin-bottom:30px">
+    <div class="name c-dim">AIRA</div><div class="divider"></div>
+    <div class="tagline" style="color:rgba(200,220,232,0.25)">processing</div>
+  </div>
+  <div style="position:relative;width:88px;height:88px;margin-bottom:28px">
+    <div style="width:88px;height:88px;border-radius:50%;border:1.5px solid transparent;border-top-color:rgba(200,220,232,0.65);border-right-color:rgba(200,220,232,0.2);animation:spin 1.1s linear infinite"></div>
+    <div style="position:absolute;width:64px;height:64px;border-radius:50%;border:1px solid transparent;border-bottom-color:rgba(200,220,232,0.45);border-left-color:rgba(200,220,232,0.15);top:50%;left:50%;transform:translate(-50%,-50%);animation:spinR 1.7s linear infinite"></div>
+  </div>
+  <div class="state-lbl" style="color:rgba(200,220,232,0.38);letter-spacing:5px" id="procLabel">saving</div>
+  <div style="display:flex;gap:8px;margin-top:18px"><span style="width:5px;height:5px;border-radius:50%;background:rgba(200,220,232,0.35);animation:dP 1.4s ease-in-out infinite"></span><span style="width:5px;height:5px;border-radius:50%;background:rgba(200,220,232,0.35);animation:dP 1.4s ease-in-out infinite .2s"></span><span style="width:5px;height:5px;border-radius:50%;background:rgba(200,220,232,0.35);animation:dP 1.4s ease-in-out infinite .4s"></span></div>
+</div>
+
+<!-- ══ CONFIRMED ══ -->
+<div class="page" id="pgConf">
+  <div class="rings"><div class="ring ring1 pg"></div><div class="ring ring2 pg" style="animation-delay:.7s"></div><div class="ring ring3 pg" style="animation-delay:1.4s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="cClk">--:--</span><div class="dot green"></div><span class="tb" id="cDt">—</span></div>
+  <div class="name-block" style="margin-bottom:14px">
+    <div class="name c-green">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(90,210,150,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(90,210,150,0.5)">saved</div>
+  </div>
+  <div class="icon-lg" style="color:rgba(90,210,150,0.9);text-shadow:0 0 30px rgba(90,210,150,0.4)">✓</div>
+  <div class="sub-label" style="color:rgba(90,210,150,0.45);letter-spacing:4px;margin-top:10px">saved to</div>
+  <div class="big" style="font-size:30px;color:rgba(90,210,150,0.8);text-shadow:0 0 20px rgba(90,210,150,0.25);margin-top:4px;margin-bottom:28px" id="confFolder">—</div>
+  <div class="state-lbl" style="color:rgba(90,210,150,0.7);letter-spacing:6px">done</div>
+</div>
+
+<!-- ══ REMINDER ══ -->
+<div class="page" id="pgReminder">
+  <div class="rings"><div class="ring ring1 pa"></div><div class="ring ring2 pa" style="animation-delay:.6s"></div><div class="ring ring3 pa" style="animation-delay:1.2s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="remClk">--:--</span><div class="dot amber"></div><span class="tb" id="remDt">—</span></div>
+  <div class="name-block" style="margin-bottom:14px">
+    <div class="name c-amber">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(220,170,80,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(220,170,80,0.5)">reminder</div>
+  </div>
+  <div class="icon-lg" style="color:rgba(220,170,80,0.9);text-shadow:0 0 30px rgba(220,170,80,0.35)">◎</div>
+  <div class="big" style="font-size:48px;color:rgba(220,170,80,0.85);text-shadow:0 0 30px rgba(220,170,80,0.3);margin-top:8px" id="remTime">08:00</div>
+  <div class="note-content" style="color:rgba(220,170,80,0.6);margin-top:6px" id="remText">reminder text</div>
+  <div class="state-lbl" style="color:rgba(220,170,80,0.55);letter-spacing:5px;margin-top:20px">scheduled</div>
+</div>
+
+<!-- ══ NOTE / MEMORY ══ -->
+<div class="page" id="pgNote">
+  <div class="rings"><div class="ring ring1 pp"></div><div class="ring ring2 pp" style="animation-delay:1s"></div><div class="ring ring3 pp" style="animation-delay:2s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="nClk">--:--</span><div class="dot purple"></div><span class="tb" id="nDt">—</span></div>
+  <div class="name-block" style="margin-bottom:14px">
+    <div class="name c-purple">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(160,120,220,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(160,120,220,0.5)">memory</div>
+  </div>
+  <div class="sub-label" style="color:rgba(160,120,220,0.45);letter-spacing:4px;margin-bottom:10px" id="noteLabel">saved note</div>
+  <div class="note-content" style="color:rgba(160,120,220,0.75)" id="noteText">—</div>
+  <div class="state-lbl" style="color:rgba(160,120,220,0.5);letter-spacing:5px;margin-top:24px">stored</div>
+</div>
+
+<!-- ══ TYPING / COMPOSING ══ -->
+<div class="page" id="pgTyping">
+  <div class="rings"><div class="ring ring1 pc"></div><div class="ring ring2 pc" style="animation-delay:.9s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="tClk">--:--</span><div class="dot cyan"></div><span class="tb" id="tDt">—</span></div>
+  <div class="name-block" style="margin-bottom:20px">
+    <div class="name c-cyan">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(80,200,220,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(80,200,220,0.5)" id="typingLabel">composing</div>
+  </div>
+  <div class="typing-text" id="typingDisplay"></div>
+  <div class="state-lbl" style="color:rgba(80,200,220,0.55);letter-spacing:5px;margin-top:24px">writing</div>
+</div>
+
+<!-- ══ ALERT ══ -->
+<div class="page" id="pgAlert">
+  <div class="rings"><div class="ring ring1 pr"></div><div class="ring ring2 pr" style="animation-delay:.4s"></div><div class="ring ring3 pr" style="animation-delay:.8s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="aClk">--:--</span><div class="dot red"></div><span class="tb" id="aDt">—</span></div>
+  <div class="name-block" style="margin-bottom:14px">
+    <div class="name c-red">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(220,90,90,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(220,90,90,0.5)">alert</div>
+  </div>
+  <div class="icon-lg" style="color:rgba(220,90,90,0.9);text-shadow:0 0 30px rgba(220,90,90,0.4)">⚠</div>
+  <div class="big" style="font-size:24px;color:rgba(220,90,90,0.8);letter-spacing:5px;margin-top:10px" id="alertTitle">warning</div>
+  <div class="note-content" style="color:rgba(220,90,90,0.55);margin-top:8px;font-size:15px" id="alertText">alert message</div>
+  <div class="state-lbl" style="color:rgba(220,90,90,0.6);letter-spacing:5px;margin-top:20px">attention required</div>
+</div>
+
+<!-- ══ MUSIC ══ -->
+<div class="page" id="pgMusic">
+  <div class="rings"><div class="ring ring1 pp"></div><div class="ring ring2 pp" style="animation-delay:1.2s"></div><div class="ring ring3 pp" style="animation-delay:2.4s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="mClk">--:--</span><div class="dot purple"></div><span class="tb" id="mDt">—</span></div>
+  <div class="name-block" style="margin-bottom:18px">
+    <div class="name c-purple">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(160,120,220,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(160,120,220,0.5)">playing</div>
+  </div>
+  <div class="sub-label" style="color:rgba(160,120,220,0.4);letter-spacing:3px;margin-bottom:4px" id="musicArtist">artist</div>
+  <div class="big" style="font-size:30px;color:rgba(160,120,220,0.85);text-shadow:0 0 20px rgba(160,120,220,0.3)" id="musicTitle">song title</div>
+  <div class="prog-bar" style="background:rgba(160,120,220,0.1)"><div class="prog-fill" id="musicProg" style="background:rgba(160,120,220,0.7);width:35%"></div></div>
+  <div class="music-controls" style="margin-top:20px">
+    <button class="mc-btn" style="border-color:rgba(160,120,220,0.2);color:rgba(160,120,220,0.55)">⏮</button>
+    <button class="mc-btn main" style="border-color:rgba(160,120,220,0.4);color:rgba(160,120,220,0.9)" id="playPauseBtn">⏸</button>
+    <button class="mc-btn" style="border-color:rgba(160,120,220,0.2);color:rgba(160,120,220,0.55)">⏭</button>
+  </div>
+</div>
+
+<!-- ══ WEATHER / INFO ══ -->
+<div class="page" id="pgWeather">
+  <div class="rings"><div class="ring ring1 pc"></div><div class="ring ring2 pc" style="animation-delay:1s"></div><div class="ring ring3 pc" style="animation-delay:2s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="wClk">--:--</span><div class="dot cyan"></div><span class="tb" id="wDt">—</span></div>
+  <div class="name-block" style="margin-bottom:14px">
+    <div class="name c-cyan">AIRA</div><div class="divider" style="background:linear-gradient(90deg,transparent,rgba(80,200,220,0.4),transparent)"></div>
+    <div class="tagline" style="color:rgba(80,200,220,0.5)" id="wxCity">chittagong</div>
+  </div>
+  <div class="big" style="font-size:72px;color:rgba(80,200,220,0.85);text-shadow:0 0 30px rgba(80,200,220,0.3);letter-spacing:4px" id="wxTemp">28°</div>
+  <div class="sub-label" style="color:rgba(80,200,220,0.5);letter-spacing:3px;margin-bottom:12px" id="wxDesc">partly cloudy</div>
+  <div class="wx-grid">
+    <div class="wx-item" style="border-color:rgba(80,200,220,0.1)"><div class="wx-val" style="color:rgba(80,200,220,0.8)" id="wxHumidity">72%</div><div class="wx-key">humidity</div></div>
+    <div class="wx-item" style="border-color:rgba(80,200,220,0.1)"><div class="wx-val" style="color:rgba(80,200,220,0.8)" id="wxWind">14km/h</div><div class="wx-key">wind</div></div>
+    <div class="wx-item" style="border-color:rgba(80,200,220,0.1)"><div class="wx-val" style="color:rgba(80,200,220,0.8)" id="wxHigh">32°</div><div class="wx-key">high</div></div>
+    <div class="wx-item" style="border-color:rgba(80,200,220,0.1)"><div class="wx-val" style="color:rgba(80,200,220,0.8)" id="wxLow">24°</div><div class="wx-key">low</div></div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="page" id="pgDash">
+  <div class="rings"><div class="ring ring1 pw"></div><div class="ring ring2 pw" style="animation-delay:1.1s"></div><div class="ring ring3 pw" style="animation-delay:2.2s"></div></div>
+  <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+  <div class="topbar"><span class="tb" id="dClk">--:--</span><div class="dot"></div><span class="tb" id="dDt">—</span></div>
+  <div class="name-block" style="margin-bottom:18px">
+    <div class="name c-blue">AIRA</div><div class="divider"></div>
+    <div class="tagline">system status</div>
+  </div>
+  <div class="dash-grid">
+    <div class="dash-item"><div class="dash-val" id="dashUp">147:22</div><div class="dash-key">uptime (hrs)</div></div>
+    <div class="dash-item"><div class="dash-val" style="color:rgba(90,210,150,0.85)">online</div><div class="dash-key">connection</div></div>
+    <div class="dash-item"><div class="dash-val" id="dashMem">2.4 GB</div><div class="dash-key">memory</div></div>
+    <div class="dash-item"><div class="dash-val" id="dashTemp2">36°C</div><div class="dash-key">core temp</div></div>
+  </div>
+  <div class="state-lbl" style="color:rgba(200,220,232,0.4);letter-spacing:5px;margin-top:20px">all systems nominal</div>
+</div>
+
+<!-- ══ SLEEP ══ -->
+<div class="page" id="pgSleep" style="background:#000">
+  <div class="sleep-time" id="sleepTime">--:--</div>
+  <div class="sleep-sub">aira · standby</div>
+</div>
+
+<!-- ══ PANEL ══ -->
+<div class="p-overlay" id="pOverlay"></div>
+<div class="panel" id="panel">
+  <div class="p-handle"></div>
+  <div class="p-head">AIRA · Director Controls</div>
+
+  <!-- HOME WAVE -->
+  <div class="p-section">
+    <div class="p-sec-title">Home Wave</div>
+    <div class="p-grid">
+      <button class="p-btn" onclick="setWave('listening');cp()">Listening</button>
+      <button class="p-btn" onclick="setWave('speaking');cp()">Speaking</button>
+      <button class="p-btn full" onclick="setWave('idle');cp()">Standby / Idle</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- RECORDING -->
+  <div class="p-section">
+    <div class="p-sec-title">Recording</div>
+    <div class="p-field"><label>Recording Type Label</label><input id="eRecType" value="voicemail" placeholder="voicemail"></div>
+    <div class="p-grid">
+      <button class="p-btn red" onclick="doRec();cp()">Start Rec</button>
+      <button class="p-btn full" onclick="doProc('saving');cp()">→ Processing</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- SAVED -->
+  <div class="p-section">
+    <div class="p-sec-title">Confirmed / Saved</div>
+    <div class="p-field"><label>Folder Name</label><input id="eFolder" value="Dear" placeholder="Dear / Voicemails / etc"></div>
+    <div class="p-grid">
+      <button class="p-btn green full" onclick="doConf();cp()">Show Saved</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- REMINDER -->
+  <div class="p-section">
+    <div class="p-sec-title">Reminder</div>
+    <div class="p-field"><label>Time</label><input id="eRemTime" value="08:00" placeholder="08:00"></div>
+    <div class="p-field"><label>Message</label><input id="eRemText" value="don't forget" placeholder="reminder message"></div>
+    <div class="p-grid">
+      <button class="p-btn amber full" onclick="doReminder();cp()">Show Reminder</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- NOTE -->
+  <div class="p-section">
+    <div class="p-sec-title">Memory / Note</div>
+    <div class="p-field"><label>Label</label><input id="eNoteLabel" value="saved note" placeholder="saved note"></div>
+    <div class="p-field"><label>Content</label><textarea id="eNoteText" rows="2" placeholder="note content...">note content here</textarea></div>
+    <div class="p-grid">
+      <button class="p-btn purple full" onclick="doNote();cp()">Show Note</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- TYPING -->
+  <div class="p-section">
+    <div class="p-sec-title">Typing / Composing</div>
+    <div class="p-field"><label>Label</label><input id="eTypingLabel" value="composing" placeholder="composing / writing / searching"></div>
+    <div class="p-field"><label>Text to Type</label><textarea id="eTypingText" rows="2" placeholder="text to animate...">composing message...</textarea></div>
+    <div class="p-grid">
+      <button class="p-btn cyan full" onclick="doTyping();cp()">Start Typing</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- ALERT -->
+  <div class="p-section">
+    <div class="p-sec-title">Alert</div>
+    <div class="p-field"><label>Title</label><input id="eAlertTitle" value="WARNING" placeholder="WARNING"></div>
+    <div class="p-field"><label>Message</label><input id="eAlertText" value="unauthorized access detected" placeholder="alert message"></div>
+    <div class="p-grid">
+      <button class="p-btn red full" onclick="doAlert();cp()">Show Alert</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- MUSIC -->
+  <div class="p-section">
+    <div class="p-sec-title">Music / Now Playing</div>
+    <div class="p-field"><label>Artist</label><input id="eMusicArtist" value="The Weeknd" placeholder="artist name"></div>
+    <div class="p-field"><label>Song</label><input id="eMusicTitle" value="Blinding Lights" placeholder="song title"></div>
+    <div class="p-grid">
+      <button class="p-btn purple full" onclick="doMusic();cp()">Show Music</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- WEATHER -->
+  <div class="p-section">
+    <div class="p-sec-title">Weather / Info</div>
+    <div class="p-field"><label>City</label><input id="eWxCity" value="Chittagong" placeholder="city"></div>
+    <div class="p-field"><label>Temp · Description</label><input id="eWxTemp" value="28°" placeholder="28°"> <input id="eWxDesc" value="partly cloudy" placeholder="description" style="margin-top:6px"></div>
+    <div class="p-grid col3">
+      <div class="p-field" style="grid-column:span 3;display:grid;grid-template-columns:1fr 1fr;gap:6px;background:transparent;border:none;padding:0;margin:0">
+        <div class="p-field" style="margin:0"><label>Humidity</label><input id="eWxH" value="72%"></div>
+        <div class="p-field" style="margin:0"><label>Wind</label><input id="eWxW" value="14km/h"></div>
+        <div class="p-field" style="margin:0"><label>High</label><input id="eWxHi" value="32°"></div>
+        <div class="p-field" style="margin:0"><label>Low</label><input id="eWxLo" value="24°"></div>
+      </div>
+    </div>
+    <div class="p-grid" style="margin-top:8px">
+      <button class="p-btn cyan full" onclick="doWeather();cp()">Show Weather</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- DASHBOARD -->
+  <div class="p-section">
+    <div class="p-sec-title">System Dashboard</div>
+    <div class="p-grid">
+      <button class="p-btn full" onclick="doDash();cp()">Show Dashboard</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- PROCESSING -->
+  <div class="p-section">
+    <div class="p-sec-title">Processing</div>
+    <div class="p-field"><label>Label</label><input id="eProcLabel" value="saving" placeholder="saving / analyzing / searching"></div>
+    <div class="p-grid">
+      <button class="p-btn full" onclick="doProc(document.getElementById('eProcLabel').value);cp()">Show Processing</button>
+    </div>
+  </div>
+  <div class="p-divider"></div>
+
+  <!-- SLEEP / HOME -->
+  <div class="p-section">
+    <div class="p-sec-title">Other</div>
+    <div class="p-grid">
+      <button class="p-btn" onclick="doSleep();cp()">Sleep Mode</button>
+      <button class="p-btn green" onclick="goHome();cp()">↩ Home</button>
+    </div>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinR{to{transform:translate(-50%,-50%) rotate(-360deg)}}
+@keyframes dP{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
+</style>
+
+<script>
+// ── Clock ──
+const clockIds=['clk','rClk','pClk','cClk','remClk','nClk','tClk','aClk','mClk','wClk','dClk'];
+const dateIds=['dt','rDt','pDt','cDt','remDt','nDt','tDt','aDt','mDt','wDt','dDt'];
+function tick(){
+  const n=new Date();
+  const t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  const D=['SUN','MON','TUE','WED','THU','FRI','SAT'],M=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const d=D[n.getDay()]+' '+n.getDate()+' '+M[n.getMonth()];
+  clockIds.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=t;});
+  dateIds.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=d;});
+  document.getElementById('sleepTime').textContent=t;
+  document.getElementById('dClk').textContent=t;
+  // uptime
+  const u=document.getElementById('dashUp');
+  if(u){const h=Math.floor((Date.now()/1000/3600)%999);const m=String(Math.floor((Date.now()/1000/60)%60)).padStart(2,'0');u.textContent=h+':'+m;}
+}
+tick();setInterval(tick,1000);
+
+// ── Canvases ──
+function mkCanvas(id){
+  const c=document.getElementById(id),x=c.getContext('2d');
+  function r(){const d=window.devicePixelRatio||1;c.width=window.innerWidth*d;c.height=110*d;c.style.width=window.innerWidth+'px';c.style.height='110px';}
+  r();window.addEventListener('resize',r);
+  return{c,x};
+}
+const {c:cvH,x:cxH}=mkCanvas('wvHome');
+const {c:cvR,x:cxR}=mkCanvas('wvRec');
+
+let audioCtx,analyser,dataArr,micReady=false;
+let wMode='idle',rafH,rafR,idleT=0,spkT=0,recT2=0;
+
+function stopRafs(){cancelAnimationFrame(rafH);cancelAnimationFrame(rafR);}
+
+function drawIdle(){
+  const W=cvH.width,H=cvH.height;cxH.clearRect(0,0,W,H);idleT+=0.01;
+  const bars=64,bw=W/bars,cx=W/2;
+  for(let i=0;i<bars;i++){
+    const x=i*bw+bw/2,dist=Math.abs(x-cx)/cx,env=Math.pow(1-dist,3.5);
+    const v=(Math.sin(idleT+i*0.2)*.5+.5)*.6+(Math.sin(idleT*.5+i*0.12)*.5+.5)*.4;
+    const h=v*env*H*.18+1.5,a=.08+env*.14;
+    cxH.fillStyle=`rgba(200,220,232,${a})`;
+    const bww=bw*.4;cxH.beginPath();cxH.roundRect(x-bww/2,H/2-h/2,bww,h,bww/2);cxH.fill();
+  }
+  rafH=requestAnimationFrame(drawIdle);
+}
+
+function drawListening(){
+  if(analyser)analyser.getByteFrequencyData(dataArr);
+  const W=cvH.width,H=cvH.height;cxH.clearRect(0,0,W,H);idleT+=0.014;
+  const bars=dataArr?Math.min(dataArr.length,64):64,bw=W/bars,cx=W/2;
+  for(let i=0;i<bars;i++){
+    const x=i*bw+bw/2,dist=Math.abs(x-cx)/cx,env=Math.pow(1-dist,2.5);
+    let v=dataArr?dataArr[i]/255:0;
+    v=Math.max(v*.88,(Math.sin(idleT+i*.18)*.5+.5)*.1);
+    const h=v*env*H*.52+2,a=.13+v*env*.4;
+    cxH.fillStyle=`rgba(200,220,232,${a})`;
+    const bww=bw*.44;cxH.beginPath();cxH.roundRect(x-bww/2,H/2-h/2,bww,h,bww/2);cxH.fill();
+  }
+  rafH=requestAnimationFrame(drawListening);
+}
+
+function drawSpeaking(){
+  if(analyser)analyser.getByteFrequencyData(dataArr);
+  const W=cvH.width,H=cvH.height;cxH.clearRect(0,0,W,H);spkT+=0.022;
+  const bars=dataArr?Math.min(dataArr.length,64):64,bw=W/bars,cx=W/2;
+  for(let i=0;i<bars;i++){
+    const x=i*bw+bw/2,dist=Math.abs(x-cx)/cx,env=Math.pow(1-dist,1.3);
+    let v=dataArr?dataArr[i]/255:0;
+    const sim=(Math.sin(spkT*2+i*.35)*.5+.5)*(Math.sin(spkT*.85-i*.2)*.5+.5);
+    v=Math.min(Math.max(v*1.15,sim*.6),1);
+    const h=v*env*H*.82+3,a=.22+v*env*.65,g=v*env;
+    cxH.shadowBlur=g*20;cxH.shadowColor=`rgba(200,220,232,${g*.5})`;
+    cxH.fillStyle=`rgba(200,220,232,${a})`;
+    const bww=bw*.5;cxH.beginPath();cxH.roundRect(x-bww/2,H/2-h/2,bww,h,bww/2);cxH.fill();
+  }
+  cxH.shadowBlur=0;rafH=requestAnimationFrame(drawSpeaking);
+}
+
+function drawRec(){
+  if(analyser)analyser.getByteFrequencyData(dataArr);
+  const W=cvR.width,H=cvR.height;cxR.clearRect(0,0,W,H);recT2+=0.018;
+  const bars=dataArr?Math.min(dataArr.length,64):64,bw=W/bars,cx=W/2;
+  for(let i=0;i<bars;i++){
+    const x=i*bw+bw/2,dist=Math.abs(x-cx)/cx,env=Math.pow(1-dist,1.8);
+    let v=dataArr?dataArr[i]/255:0;
+    const sim=(Math.sin(recT2*1.5+i*.28)*.5+.5)*(Math.sin(recT2*.7-i*.15)*.5+.5);
+    v=Math.min(Math.max(v*1.1,sim*.5),1);
+    const h=v*env*H*.7+2,a=.2+v*env*.6,g=v*env;
+    cxR.shadowBlur=g*16;cxR.shadowColor=`rgba(220,90,90,${g*.5})`;
+    cxR.fillStyle=`rgba(220,90,90,${a})`;
+    const bww=bw*.48;cxR.beginPath();cxR.roundRect(x-bww/2,H/2-h/2,bww,h,bww/2);cxR.fill();
+  }
+  cxR.shadowBlur=0;rafR=requestAnimationFrame(drawRec);
+}
+
+async function initMic(){
+  if(micReady)return;
+  try{
+    const s=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=128;analyser.smoothingTimeConstant=0.82;
+    dataArr=new Uint8Array(analyser.frequencyBinCount);
+    audioCtx.createMediaStreamSource(s).connect(analyser);
+    micReady=true;
+  }catch(e){document.getElementById('homeState').textContent='mic blocked';}
+}
+
+// ── Home wave control ──
+const homeNameEl=document.getElementById('homeName');
+const homeTagEl=document.getElementById('homeTag');
+const homeStateEl=document.getElementById('homeState');
+const orbBtn=document.getElementById('orbBtn');
+const homeRings=[document.getElementById('hr1'),document.getElementById('hr2'),document.getElementById('hr3')];
+
+function setWave(m){
+  wMode=m;stopRafs();homeRings.forEach(r=>r.classList.remove('pw'));
+  if(m==='listening'){
+    homeNameEl.classList.remove('glow');homeTagEl.style.color='';
+    homeStateEl.className='state-lbl';homeStateEl.style.color='rgba(200,220,232,0.6)';homeStateEl.style.letterSpacing='6px';homeStateEl.textContent='listening';
+    orbBtn.classList.remove('active');drawListening();
+  }else if(m==='speaking'){
+    homeNameEl.classList.add('glow');homeTagEl.style.color='rgba(200,220,232,0.7)';
+    homeStateEl.className='state-lbl';homeStateEl.style.color='rgba(200,220,232,0.85)';homeStateEl.style.letterSpacing='7px';homeStateEl.textContent='speaking';
+    orbBtn.classList.add('active');homeRings.forEach(r=>r.classList.add('pw'));drawSpeaking();
+  }else{
+    homeNameEl.classList.remove('glow');homeTagEl.style.color='';
+    homeStateEl.className='state-lbl';homeStateEl.style.color='';homeStateEl.style.letterSpacing='5px';homeStateEl.textContent='standby';
+    orbBtn.classList.remove('active');drawIdle();
+  }
+}
+
+// ── Orb ──
+let hT,iH=false,tC=false;
+orbBtn.addEventListener('pointerdown',e=>{e.preventDefault();tC=false;hT=setTimeout(()=>{tC=true;iH=true;setWave('speaking');},220);});
+orbBtn.addEventListener('pointerup',e=>{e.preventDefault();clearTimeout(hT);if(iH){iH=false;setWave('listening');}else if(!tC){wMode==='listening'?setWave('idle'):setWave('listening');}});
+orbBtn.addEventListener('pointerleave',e=>{if(iH){iH=false;clearTimeout(hT);setWave('listening');}});
+
+// ── Page nav ──
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function goHome(){
+  stopRafs();clearInterval(recInt);cancelAnimationFrame(rafR);
+  showPage('pgHome');setWave('listening');
+  if(typingTimer)clearTimeout(typingTimer);
+}
+
+// Recording
+let recInt,recSecs=0;
+function doRec(){
+  const label=document.getElementById('eRecType').value||'voicemail';
+  document.getElementById('recTypeLabel').textContent=label;
+  stopRafs();showPage('pgRec');
+  recSecs=0;document.getElementById('recTimer').textContent='00:00';
+  clearInterval(recInt);
+  recInt=setInterval(()=>{recSecs++;document.getElementById('recTimer').textContent=String(Math.floor(recSecs/60)).padStart(2,'0')+':'+String(recSecs%60).padStart(2,'0');},1000);
+  drawRec();
+}
+
+// Processing
+function doProc(label){
+  stopRafs();cancelAnimationFrame(rafR);clearInterval(recInt);
+  document.getElementById('procLabel').textContent=label||'saving';
+  showPage('pgProc');
+}
+
+// Confirmed
+function doConf(){
+  stopRafs();clearInterval(recInt);
+  document.getElementById('confFolder').textContent=(document.getElementById('eFolder').value||'Dear').toUpperCase();
+  showPage('pgConf');
+  setTimeout(()=>goHome(),3500);
+}
+
+// Reminder
+function doReminder(){
+  document.getElementById('remTime').textContent=document.getElementById('eRemTime').value||'08:00';
+  document.getElementById('remText').textContent=document.getElementById('eRemText').value||'reminder';
+  showPage('pgReminder');
+}
+
+// Note
+function doNote(){
+  document.getElementById('noteLabel').textContent=document.getElementById('eNoteLabel').value||'saved note';
+  document.getElementById('noteText').textContent=document.getElementById('eNoteText').value||'—';
+  showPage('pgNote');
+}
+
+// Typing animation
+let typingTimer;
+function doTyping(){
+  document.getElementById('typingLabel').textContent=document.getElementById('eTypingLabel').value||'composing';
+  const fullText=document.getElementById('eTypingText').value||'composing...';
+  showPage('pgTyping');
+  const el=document.getElementById('typingDisplay');
+  el.innerHTML='';
+  let i=0;
+  if(typingTimer)clearTimeout(typingTimer);
+  function typeChar(){
+    if(i<fullText.length){
+      el.innerHTML=fullText.slice(0,i+1)+'<span class="cursor"></span>';
+      i++;typingTimer=setTimeout(typeChar,60+Math.random()*40);
+    }else{
+      el.innerHTML=fullText+'<span class="cursor"></span>';
+    }
+  }
+  typeChar();
+}
+
+// Alert
+function doAlert(){
+  document.getElementById('alertTitle').textContent=(document.getElementById('eAlertTitle').value||'WARNING').toUpperCase();
+  document.getElementById('alertText').textContent=document.getElementById('eAlertText').value||'alert';
+  showPage('pgAlert');
+}
+
+// Music
+let musicPlaying=true;
+function doMusic(){
+  document.getElementById('musicArtist').textContent=document.getElementById('eMusicArtist').value||'Artist';
+  document.getElementById('musicTitle').textContent=document.getElementById('eMusicTitle').value||'Song Title';
+  showPage('pgMusic');
+  animateProgress();
+}
+let progRaf,prog=35;
+function animateProgress(){
+  cancelAnimationFrame(progRaf);
+  function step(){prog+=0.008;if(prog>100)prog=0;document.getElementById('musicProg').style.width=prog+'%';progRaf=requestAnimationFrame(step);}
+  if(musicPlaying)step();
+}
+document.getElementById('playPauseBtn').addEventListener('click',()=>{
+  musicPlaying=!musicPlaying;
+  document.getElementById('playPauseBtn').textContent=musicPlaying?'⏸':'▶';
+  if(musicPlaying)animateProgress();else cancelAnimationFrame(progRaf);
+});
+
+// Weather
+function doWeather(){
+  document.getElementById('wxCity').textContent=(document.getElementById('eWxCity').value||'City').toLowerCase();
+  document.getElementById('wxTemp').textContent=document.getElementById('eWxTemp').value||'28°';
+  document.getElementById('wxDesc').textContent=document.getElementById('eWxDesc').value||'clear';
+  document.getElementById('wxHumidity').textContent=document.getElementById('eWxH').value||'72%';
+  document.getElementById('wxWind').textContent=document.getElementById('eWxW').value||'14km/h';
+  document.getElementById('wxHigh').textContent=document.getElementById('eWxHi').value||'32°';
+  document.getElementById('wxLow').textContent=document.getElementById('eWxLo').value||'24°';
+  showPage('pgWeather');
+}
+
+// Dashboard
+function doDash(){stopRafs();showPage('pgDash');}
+
+// Sleep
+function doSleep(){stopRafs();clearInterval(recInt);showPage('pgSleep');}
+// tap sleep to wake
+document.getElementById('pgSleep').addEventListener('click',()=>goHome());
+
+// ── Panel ──
+const panel=document.getElementById('panel'),pOverlay=document.getElementById('pOverlay');
+let panelOpen=false;
+function openPanel(){panel.classList.add('open');pOverlay.classList.add('show');panelOpen=true;}
+function closePanel(){panel.classList.remove('open');pOverlay.classList.remove('show');panelOpen=false;}
+function cp(){closePanel();}
+pOverlay.addEventListener('click',closePanel);
+
+// swipe up from bottom
+let bY=0;
+document.addEventListener('touchstart',e=>{bY=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dy=bY-e.changedTouches[0].clientY;
+  const fromBottom=window.innerHeight-bY;
+  if(dy>55&&fromBottom<130&&!panelOpen)openPanel();
+},{passive:true});
+
+// ── Boot ──
+(async()=>{setWave('idle');await initMic();setWave('listening');})();
+</script>
+</body>
+</html>
