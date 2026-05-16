@@ -1,7 +1,7 @@
 {
   "name": "AIRA",
   "short_name": "AIRA",
-  "start_url": "./aira.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#05050a",
   "theme_color": "#05050a",
